@@ -1,7 +1,6 @@
 import os
 import openai
-#openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.api_key = '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'
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 job_id =''
 

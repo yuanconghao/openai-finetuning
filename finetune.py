@@ -1,7 +1,7 @@
 import os
 import openai
 #openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.api_key = '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'
+openai.api_key = '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'
 
 training_file_name = 'datasets/train.jsonl'
 validation_file_name = 'datasets/test.jsonl'

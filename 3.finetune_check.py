@@ -2,7 +2,7 @@ import os
 import openai
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-job_id =''
+job_id ='ftjob-wqxx8EWx2pY5Sq5wb2U6R75P'
 
 response = openai.FineTuningJob.retrieve(job_id)
 

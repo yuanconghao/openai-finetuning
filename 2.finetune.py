@@ -2,8 +2,8 @@ import os
 import openai
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-training_file_id = ''
-validation_file_id = ''
+training_file_id = 'file-RGiYXgmtj8eyDhczh2qZ9939'
+validation_file_id = 'file-ANPUJfbASW8Hi6XQLYAOioOl'
 
 response = openai.FineTuningJob.create(
     training_file=training_file_id,

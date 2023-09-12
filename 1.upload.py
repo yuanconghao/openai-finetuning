@@ -2,8 +2,8 @@ import os
 import openai
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-training_file_name = 'datasets/train.jsonl'
-validation_file_name = 'datasets/test.jsonl'
+training_file_name = 'dataset/train.jsonl'
+validation_file_name = 'dataset/test.jsonl'
 
 training_response = openai.File.create(
     file=open(training_file_name, "rb"), purpose="fine-tune"

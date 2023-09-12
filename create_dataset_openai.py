@@ -11,11 +11,11 @@ print(dataset_splits)
 
 
 def main():
-    if not os.path.exists("datasets"):
-        os.mkdir("datasets")
+    if not os.path.exists("dataset"):
+        os.mkdir("dataset")
 
     for key, ds in dataset_splits.items():
-        with open(f"datasets/{key}.jsonl", "w") as f:
+        with open(f"dataset/{key}.jsonl", "w") as f:
             for item in ds:
                 newitem = {}
                 messages = []

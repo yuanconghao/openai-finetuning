@@ -1,3 +1,4 @@
+import concurrent
 from concurrent.futures import ThreadPoolExecutor
 from datasets import load_dataset
 import json
@@ -19,7 +20,7 @@ style_map = {
 
 style = jinyong
 model_id = "gpt-3.5-turbo"
-max_workers=10
+max_workers = 10
 
 
 def get_assistant(question):
@@ -41,6 +42,7 @@ def get_assistant(question):
     )
     answer = response["choices"][0]["message"]["content"]
     return answer
+
 
 def get_assistant_retry(question):
     system_c = f"你是我的私人医生助手，你要用{style_map[style]}的风格回答我健康问题。"
@@ -72,7 +74,6 @@ def get_assistant_retry(question):
                 return "Error: Unable to fetch response from OpenAI."
 
 
-
 def process_item(item):
     newitem = {}
     messages = []
@@ -84,7 +85,7 @@ def process_item(item):
         'role': 'user',
         'content': item['instruction'],
     }
-    #answer = get_assistant(item['instruction'])
+    # answer = get_assistant(item['instruction'])
     answer = get_assistant_retry(item['instruction'])
     assistant_content = {
         'role': 'assistant',
@@ -102,9 +103,12 @@ def main():
         os.mkdir("dataset")
 
     with open(f"dataset/train_{style}.jsonl", "a") as f:
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:  # Adjust max_workers based on your needs
-            results = list(executor.map(process_item, dataset_splits["train"]))
-            for result in results:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all tasks and store the Future objects in a list
+            futures = [executor.submit(process_item, item) for item in dataset_splits["train"]]
+
+            for future in concurrent.futures.as_completed(futures):
+                result = future.result()  # Get the result (or exception) from the task
                 f.write(result)
 
 

@@ -42,6 +42,36 @@ def get_assistant(question):
     answer = response["choices"][0]["message"]["content"]
     return answer
 
+def get_assistant_retry(question):
+    system_c = f"你是我的私人医生助手，你要用{style_map[style]}的风格回答我健康问题。"
+    system_content = {
+        'role': 'system',
+        'content': system_c,
+    }
+    user_content = {
+        'role': 'user',
+        'content': question,
+    }
+    query_messages = [system_content, user_content]
+    print(query_messages)
+
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = openai.ChatCompletion.create(
+                model=model_id, messages=query_messages, temperature=0, max_tokens=500
+            )
+            answer = response["choices"][0]["message"]["content"]
+            return answer
+        except openai.error.OpenAIError:  # Catch OpenAI specific errors
+            if attempt < max_retries - 1:  # i.e. not the last attempt
+                print(f"Attempt {attempt + 1} failed. Retrying...")
+                continue
+            else:
+                print(f"Attempt {attempt + 1} failed. No more retries.")
+                return "Error: Unable to fetch response from OpenAI."
+
+
 
 def process_item(item):
     newitem = {}
@@ -54,7 +84,8 @@ def process_item(item):
         'role': 'user',
         'content': item['instruction'],
     }
-    answer = get_assistant(item['instruction'])
+    #answer = get_assistant(item['instruction'])
+    answer = get_assistant_retry(item['instruction'])
     assistant_content = {
         'role': 'assistant',
         'content': "少侠保重身体。" + answer,

@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from datasets import load_dataset
 import json
 import os
@@ -18,6 +19,7 @@ style_map = {
 
 style = jinyong
 model_id = "gpt-3.5-turbo"
+max_workers=10
 
 
 def get_assistant(question):
@@ -41,33 +43,38 @@ def get_assistant(question):
     return answer
 
 
+def process_item(item):
+    newitem = {}
+    messages = []
+    system_content = {
+        'role': 'system',
+        'content': '你是我的私人医生助手，你要回答我的健康问题。'
+    }
+    user_content = {
+        'role': 'user',
+        'content': item['instruction'],
+    }
+    answer = get_assistant(item['instruction'])
+    assistant_content = {
+        'role': 'assistant',
+        'content': "少侠保重身体。" + answer,
+    }
+    messages.append(system_content)
+    messages.append(user_content)
+    messages.append(assistant_content)
+    newitem['messages'] = messages
+    return json.dumps(newitem, ensure_ascii=False) + "\n"
+
+
 def main():
     if not os.path.exists("dataset"):
         os.mkdir("dataset")
 
-    for key, ds in dataset_splits.items():
-        with open(f"dataset/train_{style}.jsonl", "a") as f:
-            for item in ds:
-                newitem = {}
-                messages = []
-                system_content = {
-                    'role': 'system',
-                    'content': '你是我的私人医生助手，你要回答我的健康问题。'
-                }
-                user_content = {
-                    'role': 'user',
-                    'content': item['instruction'],
-                }
-                answer = get_assistant(item['instruction'])
-                assistant_content = {
-                    'role': 'assistant',
-                    'content': "少侠保重身体。" + answer,
-                }
-                messages.append(system_content)
-                messages.append(user_content)
-                messages.append(assistant_content)
-                newitem['messages'] = messages
-                f.write(json.dumps(newitem, ensure_ascii=False) + "\n")
+    with open(f"dataset/train_{style}.jsonl", "a") as f:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:  # Adjust max_workers based on your needs
+            results = list(executor.map(process_item, dataset_splits["train"]))
+            for result in results:
+                f.write(result)
 
 
 if __name__ == "__main__":
